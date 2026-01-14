@@ -1,0 +1,22 @@
+[
+  {
+    "id": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "chain": "solana",
+    "name": "Bonk",
+    "symbol": "Bonk",
+    "contract": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "price_usd": 1.076e-05,
+    "market_cap": 946963586,
+    "fdv": 956297974,
+    "liquidity_usd": 288134.54,
+    "lp_details": {
+      "dex": "orca",
+      "pair_address": "5zpyutJu9ee6jFymDGoK7F6S5Kczqtc9FomP3ueKuyA9",
+      "quote_token": "SOL",
+      "price_in_quote": 7.5e-08
+    },
+    "binance_spot": true,
+    "binance_futures": false,
+    "listing_time": "N/A"
+  }
+]
