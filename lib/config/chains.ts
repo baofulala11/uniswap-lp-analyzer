@@ -4,7 +4,7 @@ export const SUPPORTED_CHAINS = {
     id: 1,
     name: 'Ethereum',
     rpcUrl: 'https://eth.llamarpc.com',
-    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3',
+    subgraphUrl: 'https://api.studio.thegraph.com/query/48211/uniswap-v3-mainnet/version/latest',
     v4SubgraphUrl: '', // V4 待补充
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   },
@@ -20,7 +20,7 @@ export const SUPPORTED_CHAINS = {
     id: 56,
     name: 'BSC',
     rpcUrl: 'https://bsc-dataseed1.binance.org',
-    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-bsc', // 第三方
+    subgraphUrl: 'https://api.studio.thegraph.com/query/48211/uniswap-v3-bsc/version/latest',
     v4SubgraphUrl: '',
     nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
   },
