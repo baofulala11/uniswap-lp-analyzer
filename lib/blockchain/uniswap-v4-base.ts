@@ -38,20 +38,21 @@ interface V4Pool {
 }
 
 export async function fetchUniswapV4Pools(): Promise<V4Pool[]> {
+  // Use LlamaRPC for better rate limits
   const client = createPublicClient({
     chain: base,
-    transport: http('https://mainnet.base.org'),
+    transport: http('https://base.llamarpc.com'),
   })
 
   try {
     // Get current block
     const currentBlock = await client.getBlockNumber()
 
-    // Fetch Initialize events from recent blocks (last 500k blocks, about 2 weeks on Base)
-    // Base started supporting V4 around block 21000000
-    const bigInt500k = BigInt(500000)
-    const bigInt21m = BigInt(21000000)
-    const fromBlock = currentBlock > bigInt500k ? currentBlock - bigInt500k : bigInt21m
+    // Reduce range to last 100k blocks (~1 week) to avoid RPC limits
+    // V4 was deployed around block 23500000 on Base (December 2024)
+    const bigInt100k = BigInt(100000)
+    const v4DeployBlock = BigInt(23500000)
+    const fromBlock = currentBlock > bigInt100k ? currentBlock - bigInt100k : v4DeployBlock
 
     console.log(`Fetching V4 pools from block ${fromBlock} to ${currentBlock}`)
 
