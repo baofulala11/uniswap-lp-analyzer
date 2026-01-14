@@ -48,31 +48,51 @@ export async function fetchUniswapV4Pools(): Promise<V4Pool[]> {
     // Get current block
     const currentBlock = await client.getBlockNumber()
 
-    // Reduce range to last 100k blocks (~1 week) to avoid RPC limits
+    // RPC allows max 1000 blocks per query, so fetch in batches
     // V4 was deployed around block 23500000 on Base (December 2024)
-    const bigInt100k = BigInt(100000)
+    const bigInt1000 = BigInt(1000)
     const v4DeployBlock = BigInt(23500000)
-    const fromBlock = currentBlock > bigInt100k ? currentBlock - bigInt100k : v4DeployBlock
 
-    console.log(`Fetching V4 pools from block ${fromBlock} to ${currentBlock}`)
+    // Fetch last 5000 blocks in 5 batches of 1000
+    const batchCount = 5
+    const allLogs: any[] = []
 
-    const logs = await client.getLogs({
-      address: POOL_MANAGER_ADDRESS,
-      event: {
-        type: 'event',
-        name: 'Initialize',
-        inputs: [
-          { type: 'bytes32', indexed: true, name: 'id' },
-          { type: 'address', indexed: true, name: 'currency0' },
-          { type: 'address', indexed: true, name: 'currency1' },
-          { type: 'uint24', indexed: false, name: 'fee' },
-          { type: 'int24', indexed: false, name: 'tickSpacing' },
-          { type: 'address', indexed: false, name: 'hooks' },
-        ],
-      },
-      fromBlock,
-      toBlock: currentBlock,
-    })
+    for (let i = 0; i < batchCount; i++) {
+      const toBlock = currentBlock - (BigInt(i) * bigInt1000)
+      const fromBlock = toBlock - bigInt1000 + BigInt(1)
+
+      if (fromBlock < v4DeployBlock) break
+
+      console.log(`Batch ${i + 1}/${batchCount}: Fetching blocks ${fromBlock} to ${toBlock}`)
+
+      try {
+        const logs = await client.getLogs({
+          address: POOL_MANAGER_ADDRESS,
+          event: {
+            type: 'event',
+            name: 'Initialize',
+            inputs: [
+              { type: 'bytes32', indexed: true, name: 'id' },
+              { type: 'address', indexed: true, name: 'currency0' },
+              { type: 'address', indexed: true, name: 'currency1' },
+              { type: 'uint24', indexed: false, name: 'fee' },
+              { type: 'int24', indexed: false, name: 'tickSpacing' },
+              { type: 'address', indexed: false, name: 'hooks' },
+            ],
+          },
+          fromBlock,
+          toBlock,
+        })
+
+        allLogs.push(...logs)
+        console.log(`Found ${logs.length} pools in this batch`)
+      } catch (error) {
+        console.error(`Error in batch ${i + 1}:`, error)
+        // Continue with next batch
+      }
+    }
+
+    const logs = allLogs
 
     console.log(`Found ${logs.length} V4 pool initialization events`)
 
