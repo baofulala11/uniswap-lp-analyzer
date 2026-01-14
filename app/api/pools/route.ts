@@ -3,8 +3,12 @@ import { querySubgraph } from '@/lib/subgraph/client'
 import { GET_TOP_POOLS } from '@/lib/subgraph/queries'
 import { calculateBaseAPR } from '@/lib/utils/apr-calculator'
 import { ChainKey } from '@/lib/config/chains'
+import { MOCK_POOLS } from '@/lib/mock-data'
 
 export const dynamic = 'force-dynamic'
+
+// Flag to use mock data when Subgraph is unavailable
+const USE_MOCK_DATA = true
 
 interface PoolQueryResult {
   pools: Array<{
@@ -44,16 +48,24 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '20')
 
   try {
-    // 查询 Subgraph
-    const data = await querySubgraph<PoolQueryResult>(
-      chain,
-      GET_TOP_POOLS,
-      {
-        first: limit,
-        orderBy: orderBy,
-        orderDirection: 'desc',
-      }
-    )
+    let data: PoolQueryResult
+
+    if (USE_MOCK_DATA) {
+      // Use mock data
+      const mockPools = MOCK_POOLS[chain] || MOCK_POOLS.ethereum
+      data = { pools: mockPools.slice(0, limit) }
+    } else {
+      // 查询 Subgraph
+      data = await querySubgraph<PoolQueryResult>(
+        chain,
+        GET_TOP_POOLS,
+        {
+          first: limit,
+          orderBy: orderBy,
+          orderDirection: 'desc',
+        }
+      )
+    }
 
     // 处理数据并计算 APR
     const pools = data.pools.map((pool) => {
